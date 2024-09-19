@@ -1,0 +1,240 @@
+const { MessageMedia,Poll } = require("whatsapp-web.js");
+const {storeBirthday,checkBirthdaysToday, listBirthdaysInMonth} = require("./supabase")
+require("dotenv").config();
+const fitnessgroupID = process.env.FITNESS_GROUP_ID;
+const gcGroupID = process.env.GC_GROUP_ID;
+
+const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  //Help Menu
+async function showBotHelp(client,msg) {
+    const helpMessage = `Available commands:
+    !help - Show this help message
+    !everyone - Tag everyone in the group
+    !admins - Tag admins only
+    !birthday DD-MM-YYYY - Add or update your birthday
+    !birthday list (1-12) - List of upcoming birthdays in this month
+    - (optional - enter number to get birthdays from a particular month)`
+
+    await msg.reply(helpMessage)
+}
+
+
+//Code to check all group names and its ID
+function getAllGroups(client){
+    console.log("Getting all groups");
+    client.getChats().then(chats => {
+    const groups = chats.filter(chat => chat.isGroup);
+    console.log('Groups:');
+    groups.forEach(group => {
+        console.log(`${group.name} - ${group.id._serialized}`);
+    });
+});
+}
+
+//Get all group admins
+async function getGroupAdmins(chat) {
+    const participants = await chat.participants;
+    const admins = participants.filter(
+      (participant) => participant.isAdmin || participant.isSuperAdmin
+    );
+    return admins.map((admin) => admin.id._serialized);
+  }
+
+  //Send welcome message to new users
+async function sendWelcomeMessage(notification,client) {
+  const groupId = notification.id.remote;
+  const user = notification.recipientIds[0]; 
+
+  
+  const gcwelcomeMessage = `*Newbies Bot*: Welcome @${user.replace("@c.us","")}! We're glad to have you in this group. Please give us your introduction and your hobbies.
+  Type !help to access bot commands`;
+
+  const fitnessWelcomeMessage = `*Newbies Bot*: Welcome @${user.replace("@c.us","")}! We're glad to have you in this group. Please give us your introduction and your fitness goals.
+  Type !help to access bot commands`;
+
+  const techWelcomeMessage = `*Newbies Bot*: Welcome @${user.replace("@c.us","")}! We're glad to have you in this group. Please give us your introduction and your tech stack. If not tech, please share the tools that you use in your day-to-day work.`;
+
+  if (groupId === gcGroupID)
+      await client.sendMessage(gcGroupID, gcwelcomeMessage, {
+        mentions: [user],
+      });
+      if (groupId === fitnessgroupID)
+        await client.sendMessage(fitnessgroupID, fitnessWelcomeMessage, {
+          mentions: [user],
+        }); 
+      
+}
+
+
+// Daily poll on fitness group
+async function sendDailyPoll(client){
+
+const fitnessPoll = new Poll("Completed Daily Challenge?", [
+    "Yes",
+    "No, but went to the gym",
+    "No, but played sports",
+    "No",
+    "Did my own daily challenge (pls share)",
+  ]);
+
+  const media = MessageMedia.fromFilePath("weekly_exercise_plan.pdf");
+  await client.sendMessage(fitnessgroupID, media, {
+    caption:
+      "From *Fitness Bot* : Greetings! Its time for your daily fitness routine. Remember to stretch and warm up before you start!",
+  });
+
+  await client.sendMessage(fitnessgroupID, fitnessPoll);
+}
+
+
+// ################# Tag functions #################
+
+// Tag Admins
+async function tagAdminsOnly(msg){
+    const chat = await msg.getChat();
+    let mentions = []
+    let text = "Notification to Admins: "
+    if (chat.isGroup) {
+      const admins = await getGroupAdmins(chat);
+      for (let admin of admins) {
+        mentions.push(admin);
+        text += `@${admin} `.replace("@c.us","");
+      }
+
+      setTimeout(async () => {
+        await chat.sendMessage(text, { mentions });
+      }, 5000);
+    }
+}
+
+
+//Tag everyone (admin operation only)
+async function tagEveryone(msg){
+const chat = await msg.getChat();
+
+    if (chat.isGroup) {
+      const admins = await getGroupAdmins(chat);
+
+      const isAdmin = admins.includes(msg.author);
+
+      if (!isAdmin) {
+        await msg.reply("You need to be a group admin to perform this action.");
+        return;
+      }
+    }
+
+    let text = "";
+    let mentions = [];
+
+    for (let participant of chat.participants) {
+      mentions.push(`${participant.id.user}@c.us`);
+      text += `@${participant.id.user} `;
+    }
+
+    setTimeout(async () => {
+      await chat.sendMessage(text, { mentions });
+    }, 5000);
+  }
+
+
+ // ################ BIRTHDAY FUNCTIONS #################
+
+  function isValidDate(dateString) {
+    const regex = /^(\d{2})-(\d{2})-(\d{4})$/;
+
+    const match = dateString.match(regex);
+    if (!match) return false;
+    
+    const [, day, month, year] = match.map(Number);
+    
+    const date = new Date(year, month - 1, day);
+    
+    return date.getFullYear() === year &&
+           date.getMonth() === month - 1 &&
+           date.getDate() === day;
+  }
+
+  async function addBirthday(msg,client) {
+  const birthday = msg.body.split(" ")[1];
+
+    if (!birthday) {
+        msg.reply( "Usage: !birthday DD-MM-YYYY");
+        return;
+    }
+
+    if (!isValidDate(birthday)) {
+        msg.reply(
+        "Please enter a valid date in the format: DD-MM-YYYY"
+      );
+    } else {
+      const [day, month, year] = birthday.split("-");
+      const formattedBirthday = `${year}-${month.padStart(
+        2,
+        "0"
+      )}-${day.padStart(2, "0")}`;
+      console.log(`Birthday: ${formattedBirthday}`);
+
+      await storeBirthday(msg.author, formattedBirthday).then(() => {
+        msg.reply(
+          `@${msg.author.replace("@c.us","")} Your Birthday has been set successfully!`,
+          {mentions: [msg.author]}
+        );
+      });
+    }
+}
+
+async function sendBirthdayWish(client){
+    const birthdays = await checkBirthdaysToday();
+
+    console.log(birthdays);
+
+  if (birthdays.length) {
+    let text = "";
+    let mentions = [];
+
+    for (let b of birthdays) {  
+      mentions.push(b);
+      text += `@${b} `.replace('@c.us',"");
+    }
+
+      const birthdayMessage = `🎉 *Birthday Alert* \n Today we celebrate: ${text}! Happy Birthday! Party hard!!! 🎂🥳`;
+      client.sendMessage(gcGroupID, birthdayMessage,{mentions});
+  }
+}
+
+function formatDate(inputDate) {
+    const date = new Date(inputDate);
+   
+    const day = date.getDate();
+    const month = date.getMonth(); 
+
+    return `${day} ${months[month]}`;
+  }
+
+async function listBirthdays(msg,client){
+    const month = msg.body.split(" ")[2];
+    let bdays;
+    let mentions = []
+    let text = ''
+    let birthdayListMessage;
+    if(!month) bdays = await listBirthdaysInMonth()
+    else bdays = await listBirthdaysInMonth(month);
+
+    
+    for (let {user_id, birthday} of bdays) {  
+        mentions.push(user_id);
+        text += `@${user_id} : ${formatDate(birthday)} \n`.replace('@c.us',"");
+    }
+
+    if(!month) birthdayListMessage = `🎂 Upcoming Birthdays 🎉 \n ${text}`;
+    else birthdayListMessage = `🎂 Birthdays in *${months[month-1]}*: \n ${text}`;
+
+    
+    msg.reply(birthdayListMessage,{mentions});
+}
+
+module.exports = { getAllGroups ,sendDailyPoll, getGroupAdmins,tagAdminsOnly, sendWelcomeMessage,tagEveryone,addBirthday,sendBirthdayWish,listBirthdays, isValidDate, showBotHelp}

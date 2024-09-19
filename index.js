@@ -1,0 +1,83 @@
+const { Client, LocalAuth, Poll, RemoteAuth } = require("whatsapp-web.js");
+
+const qrcode = require("qrcode-terminal");
+
+const job = require("node-schedule");
+
+const {
+  sendDailyPoll,
+  tagEveryone,
+  addBirthday,
+  sendBirthdayWish,
+  sendWelcomeMessage,
+  listBirthdays,
+  tagAdminsOnly,
+  showBotHelp,
+  getAllGroups,
+} = require("./helperFunctions/helper");
+const { SupabaseSessionStore } = require("./helperFunctions/supabase");
+
+const client =new Client({
+  authStrategy: new LocalAuth(),
+});
+
+client.initialize();
+
+client.on("qr", (qr) => {
+  qrcode.generate(qr, { small: true });
+});
+
+client.on("auth_failure", () => {
+  console.log("Authentication failed, Please login again.");
+});
+
+client.on("loading_screen", () => {
+  console.log("Loading screen. Please wait...");
+});
+client.on("disconnected",()=>{
+  console.log("Disconnected")
+})
+
+client.on("ready", () => {
+  console.log("Client is ready.");
+  getAllGroups(client);
+
+  job.scheduleJob("0 10 * * *", async () => {
+    sendDailyPoll(client);
+  });
+
+  job.scheduleJob("0 0 * * *", async () => {
+    sendBirthdayWish(client);
+  });
+});
+
+client.on("message", async (msg) => {
+  if(msg.body === '!help'){
+    showBotHelp(client,msg);
+  }
+  if (msg.body.startsWith("!birthday list")) {
+    listBirthdays(msg,client);
+  } 
+  else if (msg.body.startsWith("!birthday")) {
+    addBirthday(msg, client);
+  }
+  if (msg.body === "!everyone") {
+    tagEveryone(msg);
+  }
+  if (msg.body === "!admins") {
+    tagAdminsOnly(msg);
+  }
+});
+
+client.on("group_join", async (notification) => {
+  sendWelcomeMessage(notification, client);
+});
+
+client.on("vote_update", async(vote) => {
+  
+  console.log("vote_update", vote);
+})
+
+const date = new Date();
+const time = date.toLocaleTimeString();
+console.log(`Current time: ${time}`);

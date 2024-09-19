@@ -1,0 +1,22 @@
+{
+  "name": "newbies-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "node-schedule": "^2.1.1",
+    "qrcode-terminal": "^0.12.0",
+    "twilio": "^5.3.0",
+    "whatsapp-web.js": "^1.25.0"
+  }
+}
