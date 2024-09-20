@@ -26,9 +26,6 @@ const wwebVersion = '2.2412.54';
 
 const client =new Client({
   authStrategy: new LocalAuth(),
-  puppeteer: {
-    executablePath: 'E:/Program Files/Google/Chrome/Application/chrome.exe',
-}
 });
 
 client.initialize();
