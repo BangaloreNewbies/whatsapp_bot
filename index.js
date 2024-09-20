@@ -1,9 +1,6 @@
 const { Client, LocalAuth, Poll, RemoteAuth } = require("whatsapp-web.js");
-
-const qrcode = require("qrcode-terminal");
-
+const qrcode = require("qrcode");
 const job = require("node-schedule");
-
 const {
   sendDailyPoll,
   tagEveryone,
@@ -17,14 +14,31 @@ const {
 } = require("./helperFunctions/helper");
 const { SupabaseSessionStore } = require("./helperFunctions/supabase");
 
+const express = require('express');
+app = express();
+
+app.use(express.static('public'));
+
+let qrCodeImageUrl = null;
+let clientReady = false;
+
+const wwebVersion = '2.2412.54';
+
 const client =new Client({
   authStrategy: new LocalAuth(),
+  puppeteer: {
+    executablePath: 'E:/Program Files/Google/Chrome/Application/chrome.exe',
+}
 });
 
 client.initialize();
 
 client.on("qr", (qr) => {
-  qrcode.generate(qr, { small: true });
+  // qrcode.generate(qr, { small: true });
+  qrcode.toDataURL(qr, (err, url) => {
+    console.log('QR UPDATES')
+    qrCodeImageUrl = url;
+});
 });
 
 client.on("auth_failure", () => {
@@ -40,6 +54,7 @@ client.on("disconnected",()=>{
 
 client.on("ready", () => {
   console.log("Client is ready.");
+  clientReady = true;
   getAllGroups(client);
 
   job.scheduleJob("0 10 * * *", async () => {
@@ -77,6 +92,25 @@ client.on("vote_update", async(vote) => {
   
   console.log("vote_update", vote);
 })
+
+app.get('/qr', (req, res) => {
+  if (clientReady) {
+      return res.json({ message: 'Client is already authenticated' });
+  }
+  if (qrCodeImageUrl) {
+      res.json({ qrCode: qrCodeImageUrl });
+  } else {
+      res.json({ message: 'QR code not available. Please wait...' });
+  }
+});
+
+app.get('/status', (req, res) => {
+  res.json({ status: clientReady ? 'ready' : 'not ready' });
+});
+
+app.listen(process.env.PORT || 3000, () => {
+  console.log(`Server is running`);
+});
 
 const date = new Date();
 const time = date.toLocaleTimeString();
