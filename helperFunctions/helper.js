@@ -9,6 +9,36 @@ const months = [
     "July", "August", "September", "October", "November", "December"
   ];
 
+  function randomNumber(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+  async function sendMessageWithTyping(msg,message,reply,mentions=[]) {
+    const chat = await msg.getChat();
+    try {
+        await chat.sendStateTyping();
+        let typingDuration = randomNumber(2,3) * 1000;
+        await delay(typingDuration);
+
+        const messageOptions = {};
+        if (mentions.length > 0) {
+            messageOptions.mentions = mentions;
+        }
+        
+        if (reply) {
+          await msg.reply(message,null,messageOptions);
+      }
+        else await chat.sendMessage(message,messageOptions);
+        await chat.clearState();
+    } catch (error) {
+        console.error("Error sending message with typing status:", error);
+    }
+}
+
   //Help Menu
 async function showBotHelp(client,msg) {
     const helpMessage = `Available commands:
@@ -18,8 +48,9 @@ async function showBotHelp(client,msg) {
     !birthday DD-MM-YYYY - Add or update your birthday
     !birthday list (1-12) - List of upcoming birthdays in this month
     - (optional - enter number to get birthdays from a particular month)`
-
-    await msg.reply(helpMessage)
+    
+    await sendMessageWithTyping(msg,helpMessage,true);
+    // await msg.reply(helpMessage)
 }
 
 
@@ -106,8 +137,12 @@ async function tagAdminsOnly(msg){
       }
 
       setTimeout(async () => {
+        await chat.sendStateTyping();
+        let typingDuration = randomNumber(1.2,3) * 1000;
+        await delay(typingDuration);
         await chat.sendMessage(text, { mentions });
-      }, 5000);
+        await chat.clearState();
+      }, 500);
     }
 }
 
@@ -136,8 +171,12 @@ const chat = await msg.getChat();
     }
 
     setTimeout(async () => {
-      await chat.sendMessage(text, { mentions });
-    }, 5000);
+      await chat.sendStateTyping();
+        let typingDuration = randomNumber(1.2,3) * 1000;
+        await delay(typingDuration);
+        await chat.sendMessage(text, { mentions });
+        await chat.clearState();
+    }, 500);
   }
 
 
@@ -162,14 +201,12 @@ const chat = await msg.getChat();
   const birthday = msg.body.split(" ")[1];
 
     if (!birthday) {
-        msg.reply( "Usage: !birthday DD-MM-YYYY");
+      sendMessageWithTyping(msg,"Usage: !birthday DD-MM-YYYY",true);
         return;
     }
 
     if (!isValidDate(birthday)) {
-        msg.reply(
-        "Please enter a valid date in the format: DD-MM-YYYY"
-      );
+      sendMessageWithTyping(msg,"Please enter a valid date in the format: DD-MM-YYYY",true);
     } else {
       const [day, month, year] = birthday.split("-");
       const formattedBirthday = `${year}-${month.padStart(
@@ -179,10 +216,12 @@ const chat = await msg.getChat();
       console.log(`Birthday: ${formattedBirthday}`);
 
       await storeBirthday(msg.author, formattedBirthday).then(() => {
-        msg.reply(
-          `@${msg.author.replace("@c.us","")} Your Birthday has been set successfully!`,
-          {mentions: [msg.author]}
-        );
+        sendMessageWithTyping(msg,`@${msg.author.replace("@c.us","")} Your Birthday has been set successfully!`,false,[msg.author]);
+
+        // client.sendMessage(msg.from,
+        //   `@${msg.author.replace("@c.us","")} Your Birthday has been set successfully!`,
+        //   {mentions: [msg.author]}
+        // );
       });
     }
 }
@@ -202,6 +241,7 @@ async function sendBirthdayWish(client){
     }
 
       const birthdayMessage = `🎉 *Birthday Alert* \n Today we celebrate: ${text}! Happy Birthday! Party hard!!! 🎂🥳`;
+
       client.sendMessage(gcGroupID, birthdayMessage,{mentions});
   }
 }
@@ -230,11 +270,11 @@ async function listBirthdays(msg,client){
         text += `@${user_id} : ${formatDate(birthday)} \n`.replace('@c.us',"");
     }
 
-    if(!month) birthdayListMessage = `🎂 Upcoming Birthdays 🎉 \n ${text}`;
+    if(!month) birthdayListMessage = `🎂 Upcoming Birthdays 🎉 \n ${text.length>0 ? text:"No one else this month"}`;
     else birthdayListMessage = `🎂 Birthdays in *${months[month-1]}*: \n ${text}`;
 
-    
-    msg.reply(birthdayListMessage,{mentions});
+    sendMessageWithTyping(msg,birthdayListMessage,false,mentions);
+    //client.sendMessage(msg.from,birthdayListMessage,{mentions});
 }
 
 module.exports = { getAllGroups ,sendDailyPoll, getGroupAdmins,tagAdminsOnly, sendWelcomeMessage,tagEveryone,addBirthday,sendBirthdayWish,listBirthdays, isValidDate, showBotHelp}

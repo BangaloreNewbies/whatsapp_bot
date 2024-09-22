@@ -14,21 +14,23 @@ const {
 } = require("./helperFunctions/helper");
 const { SupabaseSessionStore } = require("./helperFunctions/supabase");
 
-const express = require('express');
+const express = require("express");
 app = express();
 
-app.use(express.static('public'));
+app.use(express.static("public"));
 
 let qrCodeImageUrl = null;
 let clientReady = false;
 
-const wwebVersion = '2.2412.54';
+const wwebVersion = "2.2412.54";
 
-const client =new Client({
+const client = new Client({
   authStrategy: new LocalAuth(),
-  puppeteer: {
-    executablePath: 'E:/Program Files/Google/Chrome/Application/chrome.exe',
-}
+  puppeteer:{
+    executablePath: '/usr/bin/google-chrome',
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+
+  }
 });
 
 client.initialize();
@@ -36,9 +38,9 @@ client.initialize();
 client.on("qr", (qr) => {
   // qrcode.generate(qr, { small: true });
   qrcode.toDataURL(qr, (err, url) => {
-    console.log('QR UPDATES')
+    console.log("QR UPDATES");
     qrCodeImageUrl = url;
-});
+  });
 });
 
 client.on("auth_failure", () => {
@@ -48,9 +50,9 @@ client.on("auth_failure", () => {
 client.on("loading_screen", () => {
   console.log("Loading screen. Please wait...");
 });
-client.on("disconnected",()=>{
-  console.log("Disconnected")
-})
+client.on("disconnected", () => {
+  console.log("Disconnected");
+});
 
 client.on("ready", () => {
   console.log("Client is ready.");
@@ -67,13 +69,12 @@ client.on("ready", () => {
 });
 
 client.on("message", async (msg) => {
-  if(msg.body === '!help'){
-    showBotHelp(client,msg);
+  if (msg.body === "!help") {
+    showBotHelp(client, msg);
   }
   if (msg.body.startsWith("!birthday list")) {
-    listBirthdays(msg,client);
-  } 
-  else if (msg.body.startsWith("!birthday")) {
+    listBirthdays(msg, client);
+  } else if (msg.body.startsWith("!birthday")) {
     addBirthday(msg, client);
   }
   if (msg.body === "!everyone") {
@@ -88,24 +89,23 @@ client.on("group_join", async (notification) => {
   sendWelcomeMessage(notification, client);
 });
 
-client.on("vote_update", async(vote) => {
-  
+client.on("vote_update", async (vote) => {
   console.log("vote_update", vote);
-})
+});
 
-app.get('/qr', (req, res) => {
+app.get("/qr", (req, res) => {
   if (clientReady) {
-      return res.json({ message: 'Client is already authenticated' });
+    return res.json({ message: "Client is already authenticated" });
   }
   if (qrCodeImageUrl) {
-      res.json({ qrCode: qrCodeImageUrl });
+    res.json({ qrCode: qrCodeImageUrl });
   } else {
-      res.json({ message: 'QR code not available. Please wait...' });
+    res.json({ message: "QR code not available. Please wait..." });
   }
 });
 
-app.get('/status', (req, res) => {
-  res.json({ status: clientReady ? 'ready' : 'not ready' });
+app.get("/status", (req, res) => {
+  res.json({ status: clientReady ? "ready" : "not ready" });
 });
 
 app.listen(process.env.PORT || 3000, () => {
