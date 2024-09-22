@@ -1,5 +1,5 @@
 # Use Node.js as the base image
-FROM node:18-slim
+FROM --platform=linux/amd64 node:18-slim
 
 # Install Google Chrome Stable and fonts
 # Note: this installs the necessary libs to make the browser work with Puppeteer.
