@@ -403,7 +403,7 @@ async function listBirthdays(msg, client) {
   else birthdayListMessage = `🎂 Birthdays in *${months[month-1]}*: \n ${text}`;
 
   sendMessageWithTyping(msg,birthdayListMessage,false,mentions);
-  client.sendMessage(msg.from,birthdayListMessage,{mentions});
+  //client.sendMessage(msg.from,birthdayListMessage,{mentions});
 }
 
 module.exports = {
