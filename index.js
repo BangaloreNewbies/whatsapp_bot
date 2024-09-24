@@ -10,6 +10,8 @@ const {
   tagAdminsOnly,
   showBotHelp,
   getAllGroups,
+  pinMessage,
+  unpinMessage
 } = require("./helperFunctions/helper");
 const { SupabaseSessionStore } = require("./helperFunctions/supabase");
 
@@ -83,15 +85,21 @@ client.on("message", async (msg) => {
   if (msg.body === "!admins") {
     tagAdminsOnly(msg);
   }
+  if (msg.body === "!pin") {
+    pinMessage(client,msg);
+  }
+  if (msg.body === "!unpin"){
+    unpinMessage(client,msg);
+  }
 });
 
 client.on("group_join", async (notification) => {
   sendWelcomeMessage(notification, client);
 });
 
-client.on("vote_update", async (vote) => {
-  console.log("vote_update", vote);
-});
+// client.on("vote_update", async (vote) => {
+//   console.log("vote_update", vote);
+// });
 
 app.get("/qr", (req, res) => {
   if (clientReady) {
