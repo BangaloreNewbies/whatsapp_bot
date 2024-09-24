@@ -43,7 +43,6 @@ function delay(ms) {
 async function showBotHelp(client,msg) {
     const helpMessage = `Available commands:
     !help - Show this help message
-    !everyone - Tag everyone in the group
     !admins - Tag admins only
     !birthday DD-MM-YYYY - Add or update your birthday
     !birthday list (1-12) - List of upcoming birthdays in this month
@@ -148,36 +147,52 @@ async function tagAdminsOnly(msg){
 
 
 //Tag everyone (admin operation only)
-async function tagEveryone(msg){
-const chat = await msg.getChat();
+// async function tagEveryone(msg) {
+//   const chat = await msg.getChat();
 
-    if (chat.isGroup) {
-      const admins = await getGroupAdmins(chat);
+//   if (chat.isGroup) {
+//       const admins = await getGroupAdmins(chat);
+//       const isAdmin = admins.includes(msg.author);
 
-      const isAdmin = admins.includes(msg.author);
+//       if (!isAdmin) {
+//           await msg.reply("You need to be a group admin to perform this action.");
+//           return;
+//       }
+//   }
 
-      if (!isAdmin) {
-        await msg.reply("You need to be a group admin to perform this action.");
-        return;
-      }
-    }
+//   let mentions = [];
+//   let messages = [];
 
-    let text = "";
-    let mentions = [];
+//   const batchSize = 80;
+//   for (let i = 0; i < chat.participants.length; i += batchSize) {
+//       let batch = chat.participants.slice(i, i + batchSize);
+//       let text = "";
+//       let batchMentions = [];
 
-    for (let participant of chat.participants) {
-      mentions.push(`${participant.id.user}@c.us`);
-      text += `@${participant.id.user} `;
-    }
+//       for (let participant of batch) {
+//           batchMentions.push(`${participant.id.user}@c.us`);
+//           text += `@${participant.id.user} `;
+//       }
 
-    setTimeout(async () => {
-      await chat.sendStateTyping();
-        let typingDuration = randomNumber(1.2,3) * 1000;
-        await delay(typingDuration);
-        await chat.sendMessage(text, { mentions });
-        await chat.clearState();
-    }, 500);
-  }
+//       messages.push({ text, mentions: batchMentions });
+//   }
+
+//   for (let message of messages) {
+//       try {
+//           await chat.sendStateTyping();
+//           let typingDuration = randomNumber(1.5, 3) * 1000;
+//           await delay(typingDuration);
+//           await chat.sendMessage(message.text, { mentions: message.mentions });
+//           await chat.clearState();
+          
+//           await delay(500); // Adjust delay time as needed
+//       } catch (error) {
+//           console.error("Error sending message with mentions:", error);
+//           return;
+//       }
+//   }
+// }
+
 
 
  // ################ BIRTHDAY FUNCTIONS #################

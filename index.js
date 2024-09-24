@@ -78,9 +78,9 @@ client.on("message", async (msg) => {
   } else if (msg.body.startsWith("!birthday")) {
     addBirthday(msg, client);
   }
-  if (msg.body === "!everyone") {
-    tagEveryone(msg);
-  }
+  // if (msg.body === "!everyone") {
+  //   tagEveryone(msg);
+  // }
   if (msg.body === "!admins") {
     tagAdminsOnly(msg);
   }
