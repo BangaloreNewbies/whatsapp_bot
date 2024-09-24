@@ -3,7 +3,6 @@ const qrcode = require("qrcode");
 const job = require("node-schedule");
 const {
   sendDailyPoll,
-  tagEveryone,
   addBirthday,
   sendBirthdayWish,
   sendWelcomeMessage,

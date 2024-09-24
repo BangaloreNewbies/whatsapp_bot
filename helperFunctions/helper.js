@@ -292,4 +292,4 @@ async function listBirthdays(msg,client){
     //client.sendMessage(msg.from,birthdayListMessage,{mentions});
 }
 
-module.exports = { getAllGroups ,sendDailyPoll, getGroupAdmins,tagAdminsOnly, sendWelcomeMessage,tagEveryone,addBirthday,sendBirthdayWish,listBirthdays, isValidDate, showBotHelp}
+module.exports = { getAllGroups ,sendDailyPoll, getGroupAdmins,tagAdminsOnly, sendWelcomeMessage,addBirthday,sendBirthdayWish,listBirthdays, isValidDate, showBotHelp}

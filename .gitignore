@@ -3,3 +3,5 @@
 .env.local
 .env.staging
 /node_modules
+/.wwebjs_cache
+/.wwebjs_auth
