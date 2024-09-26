@@ -156,10 +156,15 @@ async function listBirthdaysInMonth(month = 0 ) {
     }
 
     if (data.length) {
+        console.log(data);
         return data.map(record => ({
             user_id: record.user_id,
             birthday: record.birthday 
-        }));
+        })).sort((a, b) => {
+            const dayA = new Date(a.birthday).getDate(); 
+            const dayB = new Date(b.birthday).getDate(); 
+            return dayA - dayB;
+        });
     } else {
         return [];
     }
