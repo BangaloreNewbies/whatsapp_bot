@@ -93,11 +93,17 @@ async function sendWelcomeMessage(notification, client) {
   const groupId = notification.id.remote;
   const user = notification.recipientIds[0];
 
-  const gcwelcomeMessage = `*Newbies Bot*: Welcome @${user.replace(
+  const gcwelcomeMessage = `*Newbies Bot*: Hello @${user.replace(
     "@c.us",
     ""
-  )}! We're glad to have you in this group. Please give us your introduction and your hobbies.
-  Type !help to access bot commands`;
+  )}! 
+Welcome to the Community!! 
+
+Give us a brief intro about yourself.
+Like where are you from, what do you do, what are your hobbies etc.
+
+If we don’t get an intro, you’ll be kicked. The community runs on trust and we need to know who’s joining us :)
+Type !help to access bot commands`;
 
   const fitnessWelcomeMessage = `*Newbies Bot*: Welcome @${user.replace(
     "@c.us",
