@@ -62,7 +62,8 @@ async function showBotHelp(client, msg) {
     !birthday list (1-12) - List of upcoming birthdays in this month
     - (optional - enter number to get birthdays from a particular month)
     !pin - Reply to pin a message (admins only)
-    !unpin - Reply to unpin a message (admins only)`;
+    !unpin - Reply to unpin a message (admins only)
+    !spotify - Get Spotify song links directly in the chat`;
 
   await sendMessageWithTyping(msg, helpMessage, true);
   // await msg.reply(helpMessage)
