@@ -8,6 +8,7 @@ const { getFirstResultSpotify } = require("./spotify");
 require("dotenv").config();
 const fitnessgroupID = process.env.FITNESS_GROUP_ID;
 const gcGroupID = process.env.GC_GROUP_ID;
+const techGroupID = process.env.TECH_GROUP_ID;
 
 const months = [
   "January",
@@ -113,10 +114,12 @@ Type !help to access bot commands`;
   )}! We're glad to have you in this group. Please give us your introduction and your fitness goals.
   Type !help to access bot commands`;
 
-  const techWelcomeMessage = `*Newbies Bot*: Welcome @${user.replace(
+  const techWelcomeMessage = `*Newbies Bot*: Hello @${user.replace(
     "@c.us",
     ""
-  )}! We're glad to have you in this group. Please give us your introduction and your tech stack. If not tech, please share the tools that you use in your day-to-day work.`;
+  )}! Welcome to the group please give us your introduction and share your tech stack.
+
+If not tech stack, you can just share tools you use for creative purpose/ job purpose.`
 
   if (groupId === gcGroupID)
     await client.sendMessage(gcGroupID, gcwelcomeMessage, {
@@ -126,6 +129,10 @@ Type !help to access bot commands`;
     await client.sendMessage(fitnessgroupID, fitnessWelcomeMessage, {
       mentions: [user],
     });
+    if (groupId === techGroupID)
+      await client.sendMessage(techGroupID, techWelcomeMessage, {
+        mentions: [user],
+      });
 }
 
 // Daily poll on fitness group
