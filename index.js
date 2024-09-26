@@ -11,7 +11,8 @@ const {
   showBotHelp,
   getAllGroups,
   pinMessage,
-  unpinMessage
+  unpinMessage,
+  searchSpotify
 } = require("./helperFunctions/helper");
 const { SupabaseSessionStore } = require("./helperFunctions/supabase");
 
@@ -59,7 +60,7 @@ client.on("disconnected", () => {
 client.on("ready", () => {
   console.log("Client is ready.");
   clientReady = true;
-  getAllGroups(client);
+  // getAllGroups(client);
 
   job.scheduleJob("0 10 * * *", async () => {
     sendDailyPoll(client);
@@ -90,6 +91,9 @@ client.on("message", async (msg) => {
   }
   if (msg.body === "!unpin"){
     unpinMessage(client,msg);
+  }
+  if(msg.body.startsWith("!spotify")){
+    searchSpotify(client,msg);
   }
 });
 

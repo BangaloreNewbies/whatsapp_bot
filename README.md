@@ -9,6 +9,8 @@ Built using whatsapp-web.js and containerized using Docker.
 - Add birthdays and update them
 - View upcoming birthdays and birthdays of members in a specific month.
 - Get birthday wishes at 12.00 AM
+- Pin and unpin messages (admin only)
+- Get Spotify song links directly in the chat
 
 ## How to run:
 - Clone the repository, `npm i` followed by `npm start`

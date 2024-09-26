@@ -4,6 +4,7 @@ const {
   checkBirthdaysToday,
   listBirthdaysInMonth,
 } = require("./supabase");
+const { getFirstResultSpotify } = require("./spotify");
 require("dotenv").config();
 const fitnessgroupID = process.env.FITNESS_GROUP_ID;
 const gcGroupID = process.env.GC_GROUP_ID;
@@ -412,6 +413,23 @@ async function listBirthdays(msg, client) {
   //client.sendMessage(msg.from,birthdayListMessage,{mentions});
 }
 
+//############### SPOTIFY SEARCH #################
+async function searchSpotify(client,msg){
+  const query = msg.body.replace('!spotify', '').trim(); 
+  if(!query) {
+    sendMessageWithTyping(msg, 'Usage: !spotify <search_query>', true);
+    return;
+  }
+  const resultUrl = await getFirstResultSpotify(query);
+
+  if (resultUrl) {
+    sendMessageWithTyping(msg, resultUrl, true);
+  }
+  else{
+    sendMessageWithTyping(msg, 'Service down, try after some time.', true);
+  }
+}
+
 module.exports = {
   getAllGroups,
   sendDailyPoll,
@@ -425,4 +443,5 @@ module.exports = {
   showBotHelp,
   pinMessage,
   unpinMessage,
+  searchSpotify
 };
