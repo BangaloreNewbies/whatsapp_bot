@@ -112,7 +112,7 @@ Type !help to access bot commands`;
     "@c.us",
     ""
   )}! We're glad to have you in this group. Please give us your introduction and your fitness goals.
-  Type !help to access bot commands`;
+  `;
 
   const techWelcomeMessage = `*Newbies Bot*: Hello @${user.replace(
     "@c.us",
@@ -129,10 +129,10 @@ If not tech stack, you can just share tools you use for creative purpose/ job pu
     await client.sendMessage(fitnessgroupID, fitnessWelcomeMessage, {
       mentions: [user],
     });
-    if (groupId === techGroupID)
-      await client.sendMessage(techGroupID, techWelcomeMessage, {
-        mentions: [user],
-      });
+  if (groupId === techGroupID)
+    await client.sendMessage(techGroupID, techWelcomeMessage, {
+      mentions: [user],
+    });
 }
 
 // Daily poll on fitness group
@@ -188,13 +188,13 @@ async function pinMessage(client, msg) {
       const isAdmin = admins.includes(msg.author);
       const quotedMessage = await msg.getQuotedMessage();
 
-      if (!quotedMessage){
+      if (!quotedMessage) {
         await sendMessageWithTyping(
           msg,
           "Reply to a message with !pin to pin the message.",
           true
         );
-      return;
+        return;
       }
       if (!isAdmin) {
         await sendMessageWithTyping(
@@ -250,10 +250,10 @@ async function unpinMessage(client, msg) {
         );
         return;
       } else {
-        
-          if (pinnedMsg) {
+
+        if (pinnedMsg) {
           const result = await pinnedMsg.unpin();
-          
+
         }
       }
     } else {
@@ -339,41 +339,95 @@ function isValidDate(dateString) {
   );
 }
 
+// async function addBirthday(msg, client) {
+
+//   const birthday = msg.body.split(" ")[1];
+
+//     if (!birthday) {
+//       sendMessageWithTyping(msg,"Usage: !birthday DD-MM-YYYY",true);
+//         return;
+//     }
+
+//     if (!isValidDate(birthday)) {
+//       sendMessageWithTyping(msg,"Please enter a valid date in the format: DD-MM-YYYY",true);
+//     } else {
+//       const [day, month, year] = birthday.split("-");
+//       const formattedBirthday = `${year}-${month.padStart(
+//         2,
+//         "0"
+//       )}-${day.padStart(2, "0")}`;
+//       console.log(`Birthday: ${formattedBirthday}`);
+
+//       await storeBirthday(msg.author, formattedBirthday).then(() => {
+//         sendMessageWithTyping(msg,`@${msg.author.replace("@c.us","")} Your Birthday has been set successfully!`,false,[msg.author]);
+
+//         // client.sendMessage(msg.from,
+//         //   `@${msg.author.replace("@c.us","")} Your Birthday has been set successfully!`,
+//         //   {mentions: [msg.author]}
+//         // );
+//       });
+//     }
+// }
+
 async function addBirthday(msg, client) {
-  
-  const birthday = msg.body.split(" ")[1];
+  try {
+    const birthday = msg.body.split(" ")[1];
 
-    if (!birthday) {
-      sendMessageWithTyping(msg,"Usage: !birthday DD-MM-YYYY",true);
-        return;
+    // Check if the birthday exists and is in the valid format
+    if (!birthday || !isValidDate(birthday)) {
+      await sendMessageWithTyping(msg, "Please enter a valid date in the format: DD-MM-YYYY", true);
+      return;
     }
 
-    if (!isValidDate(birthday)) {
-      sendMessageWithTyping(msg,"Please enter a valid date in the format: DD-MM-YYYY",true);
-    } else {
-      const [day, month, year] = birthday.split("-");
-      const formattedBirthday = `${year}-${month.padStart(
-        2,
-        "0"
-      )}-${day.padStart(2, "0")}`;
-      console.log(`Birthday: ${formattedBirthday}`);
+    const [day, month, year] = birthday.split("-");
+    const formattedBirthday = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+    const birthdayDate = new Date(`${formattedBirthday}T00:00:00`);  // Parse to a Date object
+    const currentDate = new Date();  // Get the current date
 
-      await storeBirthday(msg.author, formattedBirthday).then(() => {
-        sendMessageWithTyping(msg,`@${msg.author.replace("@c.us","")} Your Birthday has been set successfully!`,false,[msg.author]);
+    // Calculate 100 years ago and 100 years in the future
+    const pastLimit = new Date();
+    pastLimit.setFullYear(currentDate.getFullYear() - 100);
 
-        // client.sendMessage(msg.from,
-        //   `@${msg.author.replace("@c.us","")} Your Birthday has been set successfully!`,
-        //   {mentions: [msg.author]}
-        // );
-      });
+    const futureLimit = new Date();
+    futureLimit.setFullYear(currentDate.getFullYear() + 100);
+
+    // Check if the birthday is in the future or way too far in the past
+    if (birthdayDate > currentDate) {
+      await sendMessageWithTyping(msg, "Birthday cannot be in the future. Please enter a valid past date. And stop being a lil shit", true);
+      return;
     }
+
+    if (birthdayDate < pastLimit || birthdayDate > futureLimit) {
+      await sendMessageWithTyping(msg, "Please enter a valid past date. And stop being a lil shit", true);
+      return;
+    }
+
+    console.log(`Birthday: ${formattedBirthday}`);
+
+    // Store the birthday
+    await storeBirthday(msg.author, formattedBirthday);
+
+    // Send success message
+    await sendMessageWithTyping(
+      msg,
+      `@${msg.author.replace("@c.us", "")} Your Birthday has been set successfully!`,
+      false,
+      [msg.author]
+    );
+
+  } catch (error) {
+    console.error(`Error in addBirthday: ${error}`);
+    await sendMessageWithTyping(msg, "An error occurred. Please try again later.", true);
+  }
 }
 
-async function sendBirthdayWish(client) {
-  
-    const birthdays = await checkBirthdaysToday();
 
-    console.log(birthdays);
+
+async function sendBirthdayWish(client) {
+
+  const birthdays = await checkBirthdaysToday();
+
+  console.log(birthdays);
 
   if (birthdays.length) {
     let text = "";
@@ -381,12 +435,12 @@ async function sendBirthdayWish(client) {
 
     for (let b of birthdays) {
       mentions.push(b);
-      text += `@${b} `.replace('@c.us',"");
+      text += `@${b} `.replace('@c.us', "");
     }
 
-      const birthdayMessage = `🎉 *Birthday Alert* \n Today we celebrate: ${text}! Happy Birthday! Party hard!!! 🎂🥳`;
+    const birthdayMessage = `🎉 *Birthday Alert* \n Today we celebrate: ${text}! Happy Birthday! Party hard!!! 🎂🥳`;
 
-      client.sendMessage(gcGroupID, birthdayMessage,{mentions});
+    client.sendMessage(gcGroupID, birthdayMessage, { mentions });
   }
 }
 
@@ -400,31 +454,31 @@ function formatDate(inputDate) {
 }
 
 async function listBirthdays(msg, client) {
-  
+
   const month = msg.body.split(" ")[2];
   let bdays;
   let mentions = []
   let text = ''
   let birthdayListMessage;
-  if(!month) bdays = await listBirthdaysInMonth()
+  if (!month) bdays = await listBirthdaysInMonth()
   else bdays = await listBirthdaysInMonth(month);
 
-  for (let {user_id, birthday} of bdays) {
-      mentions.push(user_id);
-      text += `@${user_id} : ${formatDate(birthday)} \n`.replace('@c.us',"");
+  for (let { user_id, birthday } of bdays) {
+    mentions.push(user_id);
+    text += `@${user_id} : ${formatDate(birthday)} \n`.replace('@c.us', "");
   }
 
-  if(!month) birthdayListMessage = `🎂 Upcoming Birthdays 🎉 \n ${text.length>0 ? text:"No one else this month"}`;
-  else birthdayListMessage = `🎂 Birthdays in *${months[month-1]}*: \n ${text}`;
+  if (!month) birthdayListMessage = `🎂 Upcoming Birthdays 🎉 \n ${text.length > 0 ? text : "No one else this month"}`;
+  else birthdayListMessage = `🎂 Birthdays in *${months[month - 1]}*: \n ${text}`;
 
-  sendMessageWithTyping(msg,birthdayListMessage,false,mentions);
+  sendMessageWithTyping(msg, birthdayListMessage, false, mentions);
   //client.sendMessage(msg.from,birthdayListMessage,{mentions});
 }
 
 //############### SPOTIFY SEARCH #################
-async function searchSpotify(client,msg){
-  const query = msg.body.replace('!spotify', '').trim(); 
-  if(!query) {
+async function searchSpotify(client, msg) {
+  const query = msg.body.replace('!spotify', '').trim();
+  if (!query) {
     sendMessageWithTyping(msg, 'Usage: !spotify <search_query>', true);
     return;
   }
@@ -433,7 +487,7 @@ async function searchSpotify(client,msg){
   if (resultUrl) {
     sendMessageWithTyping(msg, resultUrl, true);
   }
-  else{
+  else {
     sendMessageWithTyping(msg, 'Service down, try after some time.', true);
   }
 }
