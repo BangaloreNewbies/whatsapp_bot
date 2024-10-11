@@ -12,7 +12,8 @@ const {
   getAllGroups,
   pinMessage,
   unpinMessage,
-  searchSpotify
+  searchSpotify,
+  pongCommand
 } = require("./helperFunctions/helper");
 const { SupabaseSessionStore } = require("./helperFunctions/supabase");
 
@@ -74,6 +75,9 @@ client.on("ready", () => {
 client.on("message", async (msg) => {
   if (msg.body === "!help") {
     showBotHelp(client, msg);
+  }
+  if (msg.body === "!ping") {
+    pongCommand(client, msg);
   }
   if (msg.body.startsWith("!birthday list")) {
     listBirthdays(msg, client);

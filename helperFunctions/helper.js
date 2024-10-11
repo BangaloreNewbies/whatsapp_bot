@@ -70,6 +70,11 @@ async function showBotHelp(client, msg) {
   // await msg.reply(helpMessage)
 }
 
+async function pongCommand(client, msg){
+  const message = "pong!!!";
+  await sendMessageWithTyping(msg, message, true);
+}
+
 //Code to check all group names and its ID
 function getAllGroups(client) {
   console.log("Getting all groups");
@@ -505,5 +510,6 @@ module.exports = {
   showBotHelp,
   pinMessage,
   unpinMessage,
-  searchSpotify
+  searchSpotify,
+  pongCommand
 };
