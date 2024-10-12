@@ -149,12 +149,28 @@ async function sendDailyPoll(client) {
     "No",
     "Did my own daily challenge (pls share)",
   ]);
+  const dailyChallenge = `
+  Daily Challenges:\n
+  - Sleep 8 hours\n
+  - Drink 4 liters of water\n
+  - Eat 1 fruit\n
+  - Walk 1000 steps\n\n
+  Lazy Non-Workout (Complete any 1):\n
+  1. Climb 6 floors of stairs\n
+  2. Walk 2000 steps\n
+  3. Mop, vacuum, or sweep the house\n\n
+  Lazy Eating Challenge (Complete any 1):\n
+  1. Eat 1 fruit or raw vegetable\n
+  2. Consume 10g of protein in 1 meal (1 large cup of yogurt or 2 mid-sized boiled eggs)\n
+  3. Drink 3 liters of water`;
 
   const media = MessageMedia.fromFilePath("weekly_exercise_plan.pdf");
   await client.sendMessage(fitnessgroupID, media, {
     caption:
       "From *Fitness Bot* : Greetings! Its time for your daily fitness routine. Remember to stretch and warm up before you start!",
   });
+
+  await client.sendMessage(fitnessgroupID, dailyChallenge);
 
   await client.sendMessage(fitnessgroupID, fitnessPoll);
 }
@@ -449,6 +465,11 @@ async function sendBirthdayWish(client) {
   }
 }
 
+async function sendWaterReminder(client) {
+  const waterReminder = 'From *Fitness Bot* : *Water Reminder* \nHere is a quick reminder to have water.\nIf you have seen this message, you have time to check phone so you have time to drink water RIGHT NOW!!!';
+  client.sendMessage(fitnessgroupID, waterReminder);
+}
+
 function formatDate(inputDate) {
   const date = new Date(inputDate);
 
@@ -511,5 +532,7 @@ module.exports = {
   pinMessage,
   unpinMessage,
   searchSpotify,
-  pongCommand
+  pongCommand,
+  sendWaterReminder,
+  randomNumber,
 };
