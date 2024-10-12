@@ -13,7 +13,9 @@ const {
   pinMessage,
   unpinMessage,
   searchSpotify,
-  pongCommand
+  pongCommand,
+  randomNumber,
+  sendWaterReminder
 } = require("./helperFunctions/helper");
 const { SupabaseSessionStore } = require("./helperFunctions/supabase");
 
@@ -63,12 +65,18 @@ client.on("ready", () => {
   clientReady = true;
   // getAllGroups(client);
 
-  job.scheduleJob("0 10 * * *", async () => {
+  const randomMins = randomNumber(0, 59);
+
+  job.scheduleJob(`${randomMins} 10 * * *`, async () => {
     sendDailyPoll(client);
   });
 
   job.scheduleJob("0 0 * * *", async () => {
     sendBirthdayWish(client);
+  });
+
+  job.scheduleJob(`${randomMins} 5-13/4 * * *`, async () => {
+    sendWaterReminder(client);
   });
 });
 
