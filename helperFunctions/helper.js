@@ -75,6 +75,7 @@ async function pongCommand(client, msg){
   await sendMessageWithTyping(msg, message, true);
 }
 
+
 //Code to check all group names and its ID
 function getAllGroups(client) {
   console.log("Getting all groups");
